@@ -4,7 +4,7 @@ import { Client } from '@typeit/discord';
 export class Main {
   static start() {
     const client = new Client();
-    client.login('NzI5MzE0Njc3Mzg0ODA2NDIz.XwHJZg.Qr3GHcdjvve_VnuyGygOckk_6rk', `${__dirname}/*.ts`);
+    client.login('', `${__dirname}/*.ts`); //needs bot token to work
   }
 }
 Main.start();
