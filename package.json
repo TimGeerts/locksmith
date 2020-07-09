@@ -1,0 +1,32 @@
+{
+  "name": "sinbot",
+  "version": "1.0.0",
+  "description": "Discord bot for The Eighth Sin guild on Draenor EU",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node-dev src/main.ts",
+    "commit": "git-cz"
+  },
+  "author": "Tim Geerts",
+  "dependencies": {
+    "@typeit/discord": "^4.0.8",
+    "date-fns": "^2.14.0",
+    "date-fns-tz": "^1.0.10",
+    "discord.js": "^12.2.0",
+    "node-fetch": "^2.6.0",
+    "reflect-metadata": "^0.1.13",
+    "tslib": "^1.11.1",
+    "typescript": "^3.9.6"
+  },
+  "devDependencies": {
+    "@types/node": "^13.11.1",
+    "@types/node-fetch": "^2.5.7",
+    "cz-conventional-changelog": "^3.2.0",
+    "ts-node-dev": "^1.0.0-pre.50"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}
