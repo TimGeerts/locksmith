@@ -13,6 +13,7 @@
     "date-fns": "^2.14.0",
     "date-fns-tz": "^1.0.10",
     "discord.js": "^12.2.0",
+    "dotenv": "^8.2.0",
     "node-fetch": "^2.6.0",
     "reflect-metadata": "^0.1.13",
     "tslib": "^1.11.1",

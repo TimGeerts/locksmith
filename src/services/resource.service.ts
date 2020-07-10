@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 
-const API_URL = ''; //won't work without the api url
+const API_URL = process.env.FB_API; //won't work without the api url
 const apiGet = (url: string) =>
   fetch(`${API_URL}${url}`)
     .then((r) => r.json())
