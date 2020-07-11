@@ -34,7 +34,6 @@ export abstract class Reminder {
   // parse all the reminders and check them for valid "channel" and "guild" id's
   private parseRemindersJson(reminderData: IReminder[]): IReminder[] {
     const result: IReminder[] = reminderData.filter((entry) => {
-      return false;
       if (!entry.enabled) {
         return false;
       }
