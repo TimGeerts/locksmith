@@ -25,9 +25,6 @@ export abstract class Corruption {
   private activeContaminents: IActiveContaminents;
   private corruptionBatches: ICorruptionBatch[];
 
-  constructor(x: any, y: any, z: any) {
-    console.log('corruption module, client:', x, y, z);
-  }
   @Command('corruption :param')
   @Description('Lists the currently purchasable corruptions')
   async corruption(command: CommandMessage) {
