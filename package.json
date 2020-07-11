@@ -10,10 +10,12 @@
   "author": "Tim Geerts",
   "dependencies": {
     "@typeit/discord": "^4.0.8",
+    "@types/node-cron": "^2.0.3",
     "date-fns": "^2.14.0",
     "date-fns-tz": "^1.0.10",
     "discord.js": "^12.2.0",
     "dotenv": "^8.2.0",
+    "node-cron": "^2.0.3",
     "node-fetch": "^2.6.0",
     "reflect-metadata": "^0.1.13",
     "tslib": "^1.11.1",

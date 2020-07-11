@@ -14,6 +14,10 @@ export const getCorruptionBatches = async () => {
   return apiGet('corruptionbatches.json');
 };
 
+export const getReminders = async () => {
+  return apiGet('reminders.json');
+};
+
 // export class ResourceService {
 //   private apiUrl: string;
 
