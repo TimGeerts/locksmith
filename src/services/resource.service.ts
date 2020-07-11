@@ -17,34 +17,3 @@ export const getCorruptionBatches = async () => {
 export const getReminders = async () => {
   return apiGet('reminders.json');
 };
-
-// export class ResourceService {
-//   private apiUrl: string;
-
-//   constructor() {
-//     const maybeFirebaseUrl = 'https://eighthsin-d0536.firebaseio.com/'; // update to process.env.API;
-//     if (maybeFirebaseUrl === undefined) {
-//       throw new Error('');
-//     }
-//     this.apiUrl = maybeFirebaseUrl;
-//   }
-
-//   public getCorruption() {
-//     return `getting corruption from the url ${this.apiUrl}corruptions.json`;
-//     // const URL = `${this.apiUrl}corruptions.json`;
-//     // return this.getResource(URL);
-//   }
-
-//   // public getReminders() {
-//   //   const URL = `${this.apiUrl}reminders.json`;
-//   //   return this.getResource(URL);
-//   // }
-
-//   private async getResource(url: string) {
-//     const r = await fetch(url);
-//     if (r.ok) {
-//       return r.json();
-//     }
-//     throw new Error(r.statusText);
-//   }
-// }

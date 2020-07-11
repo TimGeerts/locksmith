@@ -2,6 +2,7 @@ import DiscordJS = require('discord.js');
 import { Client, Once, ArgsOf } from '@typeit/discord';
 import { getReminders } from '../services/resource.service';
 import { schedule, validate } from 'node-cron';
+import { Logger } from '../logger';
 
 interface IReminder {
   enabled: boolean;
@@ -33,6 +34,7 @@ export abstract class Reminder {
   // parse all the reminders and check them for valid "channel" and "guild" id's
   private parseRemindersJson(reminderData: IReminder[]): IReminder[] {
     const result: IReminder[] = reminderData.filter((entry) => {
+      return false;
       if (!entry.enabled) {
         return false;
       }
@@ -62,7 +64,7 @@ export abstract class Reminder {
       }
       return true;
     });
-    console.info(`Parsed ${result.length} reminder(s) for SinBot`);
+    Logger.log(`Parsed ${result.length} reminder(s) for SinBot`, 'LOG');
     return result;
   }
 

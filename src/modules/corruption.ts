@@ -24,9 +24,10 @@ interface IActiveContaminents {
 export abstract class Corruption {
   private activeContaminents: IActiveContaminents;
   private corruptionBatches: ICorruptionBatch[];
-  private batchNumber: number;
-  private nextBatchNumber: number;
 
+  constructor(x: any, y: any, z: any) {
+    console.log('corruption module, client:', x, y, z);
+  }
   @Command('corruption :param')
   @Description('Lists the currently purchasable corruptions')
   async corruption(command: CommandMessage) {
