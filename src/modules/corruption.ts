@@ -71,6 +71,7 @@ export abstract class Corruption {
         const result = new Array<{
           name: string;
           rank: number;
+          price: number;
           start: string;
           end: string;
           isNow: boolean;
@@ -90,6 +91,7 @@ export abstract class Corruption {
           result.push({
             name: c.name,
             rank: c.rank,
+            price: c.price,
             start: format(new Date(earliestInterval.start), 'MMMM do'),
             end: format(new Date(earliestInterval.end), 'MMMM do'),
             isNow: isAvailableNow,
@@ -98,8 +100,8 @@ export abstract class Corruption {
         });
         // order them so that the earliest occurrence of the corruption (disregarding rank) gets displayed first
         result.sort((r1, r2) => (r1.seq < r2.seq ? -1 : 1));
-        const corNames = result.map((c) => c.name).join('\n');
-        const corRanks = result.map((c) => c.rank).join('\n');
+        const corNames = result.map((c) => `${c.name} ${c.rank}`).join('\n');
+        const corPrices = result.map((c) => c.price).join('\n');
         const corIntervals = result.map((c) => (c.isNow ? 'Currently for sale' : `${c.start} until ${c.end}`));
         const embed = new DiscordJS.MessageEmbed()
           .setColor('#a330c9')
@@ -108,7 +110,7 @@ export abstract class Corruption {
           .setURL('https://corruptionvendor.com/')
           .addFields(
             { name: 'Corruption', value: corNames, inline: true },
-            { name: 'Rank', value: corRanks, inline: true },
+            { name: 'Price', value: corPrices, inline: true },
             { name: 'Available', value: corIntervals, inline: true }
           );
         command.reply(embed);
