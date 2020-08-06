@@ -17,3 +17,7 @@ export const getCorruptionBatches = async () => {
 export const getReminders = async () => {
   return apiGet('reminders.json');
 };
+
+export const getLinks = async () => {
+  return apiGet('links.json');
+};
