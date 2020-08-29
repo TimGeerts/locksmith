@@ -20,7 +20,7 @@ abstract class SinBot {
     const embed = new MessageEmbed()
       .setColor("#0099ff")
       .setTitle("Welcome to SinBot")
-      .setDescription("The following commands are available: ");
+      .setDescription("The following commands are available:");
     cmds
       .filter((c) => c.commandName !== "help")
       .forEach((c) => {
