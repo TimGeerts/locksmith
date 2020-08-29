@@ -18,7 +18,7 @@ abstract class SinBot {
     cmds
       .filter((c) => c.commandName !== 'help')
       .forEach((c) => {
-        embed.addField(`${c.prefix}${c.commandName}`, c.description);
+        embed.addField(`\`${c.prefix}${c.commandName}\``, c.description);
       });
     command.reply(embed);
   }

@@ -21,3 +21,7 @@ export const getReminders = async () => {
 export const getLinks = async () => {
   return apiGet('links.json');
 };
+
+export const getGuides = async () => {
+  return apiGet('guides.json');
+};
