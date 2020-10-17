@@ -6,14 +6,6 @@ const apiGet = (url: string) =>
     .then((r) => r.json())
     .catch((r) => r.statusText);
 
-export const getCorruptions = async () => {
-  return apiGet('corruptions.json');
-};
-
-export const getCorruptionBatches = async () => {
-  return apiGet('corruptionbatches.json');
-};
-
 export const getReminders = async () => {
   return apiGet('reminders.json');
 };
