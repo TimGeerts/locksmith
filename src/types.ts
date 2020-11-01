@@ -19,3 +19,13 @@ export interface IExtraInfo {
   name: string;
   content: string;
 }
+
+export interface IRole {
+  name: string;
+  role: string;
+  emoji: string;
+}
+export interface IDungeon {
+  name: string;
+  tags: string[];
+}
