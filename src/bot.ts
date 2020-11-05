@@ -8,11 +8,11 @@ import {
   Description,
 } from "@typeit/discord";
 
-@Discord("!", {
+@Discord("?", {
   import: [Path.join(__dirname, "modules", "*.ts")],
 })
 abstract class SinBot {
-  // !help command lists out all available commands
+  // help command lists out all available commands
   @Command("help")
   @Description("List all available commands")
   private help(command: CommandMessage) {
@@ -24,7 +24,7 @@ abstract class SinBot {
     cmds
       .filter((c) => c.commandName !== "help")
       .forEach((c) => {
-        embed.addField(`\`${c.prefix}${c.commandName}\``, c.description);
+        embed.addField(`${c.prefix}${c.commandName}`, c.description);
       });
     command.reply(embed);
   }

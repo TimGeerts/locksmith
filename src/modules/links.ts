@@ -23,7 +23,7 @@ export abstract class Corruption {
               .setDescription("The following link commands are available");
 
             lnks.forEach((l) => {
-              embed.addField(`!link ${l.command}`, l.description);
+              embed.addField(`?link ${l.command}`, l.description);
             });
             command.reply(embed);
           } else {

@@ -43,7 +43,7 @@ export abstract class Guides {
       .setColor(0xfaa61a);
     this.allGuides.forEach((boss) => {
       if (boss.tags && boss.tags.length) {
-        embed.addField(`**${boss.name}:**`, `\`!guide ${boss.tags[0]}\``);
+        embed.addField(`**${boss.name}:**`, `\`?guide ${boss.tags[0]}\``);
       }
     });
     return embed;
