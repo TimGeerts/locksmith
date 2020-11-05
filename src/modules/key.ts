@@ -4,18 +4,19 @@ import {
   MessageReaction,
   User,
   EmbedField,
+  CollectorFilter,
 } from "discord.js";
 import { Command, CommandMessage, Description, Client } from "@typeit/discord";
-import { getDungeons, getRoles } from "../services/resource.service";
-import { IDungeon, IRole } from "../types";
+import { getDungeons } from "../services/resource.service";
+import { Emoji, IDungeon } from "../types";
 
 export abstract class Key {
-  private allRoles: IRole[];
-  // private lfgEmbed: MessageEmbed = new MessageEmbed();
+  private client: Client;
 
   @Command("key :key :level :tank :heal :dps")
   @Description("Displays a template for people to 'sign up' for a given key")
   async key(command: CommandMessage, client: Client) {
+    this.client = client;
     getDungeons()
       .then((dungeons: IDungeon[]) => {
         if (dungeons && dungeons.length) {
@@ -61,39 +62,20 @@ export abstract class Key {
               );
             }
             command.args.key = dungeon.name;
+            keyEmbed = this.createEmbed(command);
 
-            keyEmbed = this.createEmbed(command.args);
-            getRoles().then((r: IRole[]) => {
-              if (r && r.length) {
-                this.allRoles = r;
-                const chan = command.channel;
-                // TODO enable when the command has been tested a bit in a real discord environment
-                //chan.send("@here");
-                chan.send(keyEmbed).then((m: Message) => {
-                  this.allRoles.forEach((role) => {
-                    if (
-                      role.name === "Tank" &&
-                      (tank === 1 || tank === undefined)
-                    ) {
-                      m.react(role.emoji);
-                    }
-                    if (
-                      role.name === "Healer" &&
-                      (healer === 1 || healer === undefined)
-                    ) {
-                      m.react(role.emoji);
-                    }
-                    if (
-                      role.name === "DPS" &&
-                      (dps !== 0 || dps === undefined)
-                    ) {
-                      m.react(role.emoji);
-                    }
-                  });
-                  // create a collector to watch for reactions,
-                  this.followReactions(m, keyEmbed);
-                });
+            const chan = command.channel;
+            chan.send(keyEmbed).then((m: Message) => {
+              if (tank === 1 || tank === undefined) {
+                m.react(this.getEmojiForReaction("Tank"));
               }
+              if (healer === 1 || healer === undefined) {
+                m.react(this.getEmojiForReaction("Healer"));
+              }
+              if (dps !== 0 || dps === undefined) {
+                m.react(this.getEmojiForReaction("Dps"));
+              }
+              this.followReactions(m, keyEmbed);
             });
           }
         } else {
@@ -109,8 +91,7 @@ export abstract class Key {
 
   private followReactions(msg: Message, embed: MessageEmbed): void {
     const filter = (reaction: MessageReaction, user: User) => {
-      const emojis = this.allRoles.map((r) => r.emoji);
-      return emojis.indexOf(reaction.emoji.name) !== -1;
+      return !user.bot && this.filterReaction(reaction);
     };
     const roleCollector = msg.createReactionCollector(filter, {
       dispose: true,
@@ -136,29 +117,44 @@ export abstract class Key {
   }
 
   private findRole(reaction: MessageReaction): string {
-    return this.allRoles.find((r) => r.emoji === reaction.emoji.name)?.name;
+    let role: string = undefined;
+    // if it has an id, it's a custom emoji
+    const emojiToCheck: string = reaction.emoji.id ?? reaction.emoji.name;
+    switch (emojiToCheck) {
+      case Emoji.Tank:
+      case Emoji.TankFallBack:
+        role = "Tank";
+        break;
+      case Emoji.Healer:
+      case Emoji.HealerFallBack:
+        role = "Healer";
+        break;
+      case Emoji.Dps:
+      case Emoji.DpsFallBack:
+        role = "Dps";
+        break;
+    }
+    return role;
   }
 
-  private createEmbed(args: any): MessageEmbed {
-    const key = args.key;
-    const level = args.level;
-    const tank = args.tank;
-    const heal = args.heal;
-    let dps = args.dps;
+  private createEmbed(command: CommandMessage): MessageEmbed {
+    const key = command.args.key;
+    const level = command.args.level;
+    const tank = command.args.tank;
+    const heal = command.args.heal;
+    let dps = command.args.dps;
     const embed = new MessageEmbed().setColor("e6cc80");
     embed.setTitle(`[LFG] ${key} +${level}`);
     if (tank === 1 || tank === undefined) {
-      embed.addField(":shield:", "...");
+      embed.addField(this.getEmoji("Tank"), "...");
     }
     if (heal === 1 || heal === undefined) {
-      embed.addField(":flag_ch:", "...");
+      embed.addField(this.getEmoji("Healer"), "...");
     }
     dps = dps === undefined || dps > 3 ? 3 : dps;
-
     for (let i = 0; i < dps; i++) {
-      embed.addField(":crossed_swords:", "...");
+      embed.addField(this.getEmoji("Dps"), "...");
     }
-
     return embed;
   }
 
@@ -184,7 +180,7 @@ export abstract class Key {
         }
         break;
       default:
-        let arr = embed.fields.filter((f) => f.name === ":crossed_swords:");
+        let arr = embed.fields.filter((f) => f.name === Emoji.Dps);
         if (arr && arr.length) {
           this.handleDps(arr, userTag, add);
         }
@@ -208,19 +204,54 @@ export abstract class Key {
 
   private handleDps(fields: EmbedField[], userTag: string, add: boolean) {
     if (add) {
-      fields.every((f) => {
-        if (f.value === "...") {
-          f.value = userTag;
-          return false;
-        }
-      });
+      // find first empty field and assign the user to it
+      let empField = fields.find((f) => f.value === "...");
+      if (empField) {
+        empField.value = userTag;
+      }
     } else {
-      fields.every((f) => {
-        if (f.value === userTag) {
-          f.value = "...";
-          return false;
-        }
-      });
+      // find first matching field and unassign the user
+      let userField = fields.find((f) => f.value === userTag);
+      if (userField) {
+        userField.value = "...";
+      }
     }
+  }
+
+  // Emoji helpers, all these are basically only needed to support custom emojis
+  private getEmoji(role: string): string {
+    const e: string = Emoji[role];
+    let retVal = e;
+    // returns the emoji, either straight from the enum, or a lookup in cache in case of a custom one
+    if (Number(e)) {
+      let customEmoji = this.client.emojis.cache.find(
+        (emoji) => emoji.id === e
+      );
+      retVal = customEmoji
+        ? `<:${customEmoji.name}:${customEmoji.id}>`
+        : Emoji[`${role}FallBack`];
+    }
+    return retVal;
+  }
+
+  private getEmojiForReaction(role: string): string {
+    const e: string = Emoji[role];
+    let retVal = e;
+    // returns the emoji, either straight from the enum, or a lookup in cache in case of a custom one
+    if (Number(e)) {
+      let customEmoji = this.client.emojis.cache.find(
+        (emoji) => emoji.id === e
+      );
+      retVal = customEmoji ? customEmoji.id : Emoji[`${role}FallBack`];
+    }
+    return retVal;
+  }
+
+  private filterReaction(reaction: MessageReaction): boolean {
+    const tank = this.getEmojiForReaction("Tank");
+    const healer = this.getEmojiForReaction("Healer");
+    const dps = this.getEmojiForReaction("Dps");
+    const toCheck = reaction.emoji.id ?? reaction.emoji.name;
+    return [tank, healer, dps].includes(toCheck);
   }
 }
