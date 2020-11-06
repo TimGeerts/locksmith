@@ -1,12 +1,20 @@
-import { MessageEmbed, Message, MessageReaction, User, EmbedField } from 'discord.js';
-import { Command, CommandMessage, Description, Client, On } from '@typeit/discord';
-import { getDungeons } from '../services/resource.service';
-import { Emoji, IDungeon } from '../types';
+import {
+  MessageEmbed,
+  Message,
+  MessageReaction,
+  User,
+  EmbedField,
+  Snowflake,
+  Guild,
+} from "discord.js";
+import { Command, CommandMessage, Description, Client } from "@typeit/discord";
+import { getDungeons } from "../services/resource.service";
+import { Emoji, IDungeon } from "../types";
 
 export abstract class Key {
   private client: Client;
 
-  @Command('key :key :level :tank :heal :dps')
+  @Command("key :key :level :tank :heal :dps")
   @Description("Displays a template for people to 'sign up' for a given key")
   async key(command: CommandMessage, client: Client) {
     this.client = client;
@@ -17,69 +25,92 @@ export abstract class Key {
           let keyEmbed = new MessageEmbed();
           if (!command.args.key && !command.args.level) {
             helpEmbed
-              .setColor('#007bff')
-              .setTitle('Usage')
-              .setDescription('Some example usages of the `?key` command')
+              .setColor("#007bff")
+              .setTitle("Usage")
+              .setDescription("Some example usages of the `?key` command")
               .addField(
-                'Syntax',
-                '`?key <dungeon> <level> <tank> <healer> <dps>`\n*(tank/healer/dps are optional parameters)*'
+                "Syntax",
+                "`?key <dungeon> <level> <tank> <healer> <dps>`\n*(tank/healer/dps are optional parameters)*"
               )
-              .addField('Looking for a full group', '`?key AD 18`')
-              .addField('Looking for two dps', '`?key AD 18 0 0 2`')
-              .addField('Looking for tank and healer', '`?key AD 18 1 1 0`');
+              .addField("Looking for a full group", "`?key AD 18`")
+              .addField("Looking for two dps", "`?key AD 18 0 0 2`")
+              .addField("Looking for tank and healer", "`?key AD 18 1 1 0`");
             const dungeon_acronyms = dungeons
               .sort((a, b) => (a.name > b.name ? 1 : -1))
               .map((d) => `${d.name}: \`${d.tags[0]}\``);
-            helpEmbed.addField('Dungeon acronyms', dungeon_acronyms.join('\n'));
+            helpEmbed.addField("Dungeon acronyms", dungeon_acronyms.join("\n"));
 
             command.reply(helpEmbed);
           } else {
             const key = command.args.key;
             const level = command.args.level;
-            const tank = command.args.tank;
-            const healer = command.args.heal;
-            const dps = command.args.dps;
-            const dungeon = dungeons.find((d) => d.tags.map((t) => t.toLowerCase()).indexOf(key?.toLowerCase()) > -1);
+            // const tank = command.args.tank;
+            // const healer = command.args.heal;
+            // const dps = command.args.dps;
+            const missingRoles = this.findMissingRoles(command.args);
+
+            const dungeon = dungeons.find(
+              (d) =>
+                d.tags.map((t) => t.toLowerCase()).indexOf(key?.toLowerCase()) >
+                -1
+            );
             if (!dungeon) {
-              throw new Error(`No dungeon was found for the parameter  \`${key}\``);
+              throw new Error(
+                `No dungeon was found for the parameter  \`${key}\``
+              );
             }
             if (!level || isNaN(level)) {
-              throw new Error(`No keylevel could be determined from the parameter \`${level}\``);
+              throw new Error(
+                `No keylevel could be determined from the parameter \`${level}\``
+              );
             }
             command.args.key = dungeon.name;
             keyEmbed = this.createEmbed(command);
 
             const chan = command.channel;
+            chan.send(this.getPingStringForRoles(missingRoles, command.guild));
             chan.send(keyEmbed).then((m: Message) => {
-              if (tank === 1 || tank === undefined) {
-                m.react(this.getEmojiForReaction('Tank'));
-              }
-              if (healer === 1 || healer === undefined) {
-                m.react(this.getEmojiForReaction('Healer'));
-              }
-              if (dps !== 0 || dps === undefined) {
-                m.react(this.getEmojiForReaction('Dps'));
-              }
+              missingRoles.forEach((r) => {
+                m.react(this.getEmojiForReaction(r));
+              });
               this.followReactions(m, keyEmbed);
             });
           }
         } else {
-          throw new Error('No dungeons were found');
+          throw new Error("No dungeons were found");
         }
       })
       .catch((err: Error) => {
-        command.reply(`Sorry, I had some trouble fetching that information.\n\n${err.message}`);
+        command.reply(
+          `Sorry, I had some trouble fetching that information.\n\n${err.message}`
+        );
       });
   }
 
+  // returns an array of roles that are being looked for
+  private findMissingRoles(args: any): string[] {
+    let arr: string[] = [];
+    if (args.tank === 1 || args.tank === undefined) {
+      arr.push("Tank");
+    }
+    if (args.healer === 1 || args.healer === undefined) {
+      arr.push("Healer");
+    }
+    if (args.dps !== 0 || args.dps === undefined) {
+      arr.push("Dps");
+    }
+    return arr;
+  }
+
+  // creates the reaction handlers ("on" and "remove")
   private followReactions(msg: Message, embed: MessageEmbed): void {
     const filter = (reaction: MessageReaction, user: User) => {
-      return true; //!user.bot && this.filterReaction(reaction);
+      return !user.bot && this.filterReaction(reaction);
     };
     const roleCollector = msg.createReactionCollector(filter, {
       dispose: true,
     });
-    roleCollector.on('collect', (reaction, user) => {
+    roleCollector.on("collect", (reaction, user) => {
       if (!user.bot) {
         const roleToAssign = this.findRole(reaction);
         if (roleToAssign) {
@@ -88,7 +119,7 @@ export abstract class Key {
         }
       }
     });
-    roleCollector.on('remove', (reaction, user) => {
+    roleCollector.on("remove", (reaction, user) => {
       if (!user.bot) {
         const roleToRemove = this.findRole(reaction);
         if (roleToRemove) {
@@ -99,6 +130,7 @@ export abstract class Key {
     });
   }
 
+  // helper that returns the role based on the reaction
   private findRole(reaction: MessageReaction): string {
     let role: string = undefined;
     // if it has an id, it's a custom emoji
@@ -106,88 +138,72 @@ export abstract class Key {
     switch (emojiToCheck) {
       case Emoji.Tank:
       case Emoji.TankFallBack:
-        role = 'Tank';
+        role = "Tank";
         break;
       case Emoji.Healer:
       case Emoji.HealerFallBack:
-        role = 'Healer';
+        role = "Healer";
         break;
       case Emoji.Dps:
       case Emoji.DpsFallBack:
-        role = 'Dps';
+        role = "Dps";
         break;
     }
     return role;
   }
 
+  // create the initial embed based on the command parameters
   private createEmbed(command: CommandMessage): MessageEmbed {
     const key = command.args.key;
     const level = command.args.level;
     const tank = command.args.tank;
     const heal = command.args.heal;
     let dps = command.args.dps;
-    const embed = new MessageEmbed().setColor('e6cc80');
+    const embed = new MessageEmbed().setColor("e6cc80");
     embed.setTitle(`[LFG] ${key} +${level}`);
     if (tank === 1 || tank === undefined) {
-      embed.addField(this.getEmoji('Tank'), '...');
+      embed.addField(this.getEmoji("Tank"), "...");
     }
     if (heal === 1 || heal === undefined) {
-      embed.addField(this.getEmoji('Healer'), '...');
+      embed.addField(this.getEmoji("Healer"), "...");
     }
     dps = dps === undefined || dps > 3 ? 3 : dps;
     for (let i = 0; i < dps; i++) {
-      embed.addField(this.getEmoji('Dps'), '...');
+      embed.addField(this.getEmoji("Dps"), "...");
     }
     return embed;
   }
 
-  private updateEmbed(embed: MessageEmbed, user: User, role: string, add = true): void {
+  // update existing embed (following a reaction change)
+  private updateEmbed(
+    embed: MessageEmbed,
+    user: User,
+    role: string,
+    add = true
+  ): void {
+    if (!embed?.fields) return;
     const userTag = `<@${user.id}>`;
-    let field = null;
-    switch (role.toLocaleLowerCase()) {
-      case 'tank':
-        field = embed.fields[0];
-        if (field) {
-          this.handleTankOrHeal(field, userTag, add);
-        }
-        break;
-      case 'healer':
-        field = embed.fields[1];
-        if (field) {
-          this.handleTankOrHeal(field, userTag, add);
-        }
-        break;
-      default:
-        let arr = embed.fields.filter((f) => f.name === Emoji.Dps);
-        if (arr && arr.length) {
-          this.handleDps(arr, userTag, add);
-        }
-        break;
-    }
-  }
+    // determine if the current user has already signed (only used for 'add' action)
+    const signed = embed.fields.some((f) => f.value === userTag);
+    // determine the fields we need based on the role/emoji
+    const fields: EmbedField[] = embed.fields.filter(
+      (f) => f.name === this.getEmoji(role)
+    );
 
-  private handleTankOrHeal(field: EmbedField, userTag: string, add: boolean): void {
-    if (add) {
-      // check if there's a spot available
-      field.value = field.value === '...' ? userTag : field.value;
-    } else {
-      // if we're removing a reaction, we can only remove the tag if that user was actually tagged
-      field.value = field.value === userTag ? '...' : field.value;
-    }
-  }
-
-  private handleDps(fields: EmbedField[], userTag: string, add: boolean) {
-    if (add) {
-      // find first empty field and assign the user to it
-      let empField = fields.find((f) => f.value === '...');
+    // if the reaction is to "add" an unexisting signup
+    if (add && !signed) {
+      // find the first empty field
+      let empField = fields.find((f) => f.value === "...");
       if (empField) {
         empField.value = userTag;
       }
-    } else {
-      // find first matching field and unassign the user
+    }
+    // if the reaction is to "remove" an existing signup
+    if (!add && signed) {
+      // find the first field containing the user (there should actually only be one)
       let userField = fields.find((f) => f.value === userTag);
       if (userField) {
-        userField.value = '...';
+        userField.value = "...";
       }
     }
   }
@@ -198,8 +214,12 @@ export abstract class Key {
     let retVal = e;
     // returns the emoji, either straight from the enum, or a lookup in cache in case of a custom one
     if (Number(e)) {
-      let customEmoji = this.client.emojis.cache.find((emoji) => emoji.id === e);
-      retVal = customEmoji ? `<:${customEmoji.name}:${customEmoji.id}>` : Emoji[`${role}FallBack`];
+      let customEmoji = this.client.emojis.cache.find(
+        (emoji) => emoji.id === e
+      );
+      retVal = customEmoji
+        ? `<:${customEmoji.name}:${customEmoji.id}>`
+        : Emoji[`${role}FallBack`];
     }
     return retVal;
   }
@@ -209,17 +229,34 @@ export abstract class Key {
     let retVal = e;
     // returns the emoji, either straight from the enum, or a lookup in cache in case of a custom one
     if (Number(e)) {
-      let customEmoji = this.client.emojis.cache.find((emoji) => emoji.id === e);
+      let customEmoji = this.client.emojis.cache.find(
+        (emoji) => emoji.id === e
+      );
       retVal = customEmoji ? customEmoji.id : Emoji[`${role}FallBack`];
     }
     return retVal;
   }
 
+  // reaction filter as to not "track" every single reaction (and bot reactions)
   private filterReaction(reaction: MessageReaction): boolean {
-    const tank = this.getEmojiForReaction('Tank');
-    const healer = this.getEmojiForReaction('Healer');
-    const dps = this.getEmojiForReaction('Dps');
+    const tank = this.getEmojiForReaction("Tank");
+    const healer = this.getEmojiForReaction("Healer");
+    const dps = this.getEmojiForReaction("Dps");
     const toCheck = reaction.emoji.id ?? reaction.emoji.name;
     return [tank, healer, dps].includes(toCheck);
+  }
+
+  // get the needed "pings" for the message
+  private getPingStringForRoles(missingRoles: string[], guild: Guild): string {
+    const idsToMention: Snowflake[] = [];
+    missingRoles.forEach((missingRole) => {
+      const guildRole = guild.roles.cache.find(
+        (r) => r.name.toLocaleLowerCase() === missingRole.toLocaleLowerCase()
+      );
+      if (guildRole) {
+        idsToMention.push(guildRole.id);
+      }
+    });
+    return idsToMention.map((id) => `<@&${id}>`).join(" ");
   }
 }
