@@ -1,27 +1,25 @@
-import { MessageEmbed } from "discord.js";
-import { Command, CommandMessage, Description } from "@typeit/discord";
-import { hasParams } from "../services/helper.service";
-import { getGuides } from "../services/resource.service";
-import { IGuide } from "../types";
+import { MessageEmbed } from 'discord.js';
+import { Command, CommandMessage, Description } from '@typeit/discord';
+import { Utils } from '../utils';
+import { getGuides } from '../services/resource.service';
+import { IGuide } from '../types';
 
 export abstract class Guides {
   private allGuides: IGuide[];
 
-  @Command("guide :param")
-  @Description(
-    "Lists raid guides (written and/or youtube) for the chosen boss encounter"
-  )
+  @Command('guide :param')
+  @Description('Lists raid guides (written and/or youtube) for the chosen boss encounter')
   async guides(command: CommandMessage) {
     getGuides()
       .then((g: IGuide[]) => {
         if (g && g.length) {
           this.allGuides = g;
         } else {
-          throw new Error("No guides were found");
+          throw new Error('No guides were found');
         }
       })
       .then(() => {
-        if (!hasParams(command)) {
+        if (!Utils.hasParams(command)) {
           // no params, so list out all available guides
           command.reply(this.replyGuideList());
         } else {
@@ -31,16 +29,12 @@ export abstract class Guides {
         }
       })
       .catch((err: Error) => {
-        command.reply(
-          `Sorry, I had some trouble fetching that information.\n\n${err.message}`
-        );
+        command.reply(`Sorry, I had some trouble fetching that information.\n\n${err.message}`);
       });
   }
 
   private replyGuideList(): MessageEmbed {
-    const embed = new MessageEmbed()
-      .setTitle(`Available guide commands`)
-      .setColor(0xfaa61a);
+    const embed = new MessageEmbed().setTitle(`Available guide commands`).setColor(0xfaa61a);
     this.allGuides.forEach((boss) => {
       if (boss.tags && boss.tags.length) {
         embed.addField(`**${boss.name}:**`, `\`?guide ${boss.tags[0]}\``);
@@ -50,12 +44,8 @@ export abstract class Guides {
   }
 
   private replyGuide(g: string): MessageEmbed {
-    const guide = this.allGuides.find(
-      (b) => b.tags.map((l) => l.toLowerCase()).indexOf(g.toLowerCase()) > -1
-    );
-    const embed = new MessageEmbed()
-      .setTitle(`__${guide.name} Mythic - ${guide.raid}__`)
-      .setColor(0xfaa61a);
+    const guide = this.allGuides.find((b) => b.tags.map((l) => l.toLowerCase()).indexOf(g.toLowerCase()) > -1);
+    const embed = new MessageEmbed().setTitle(`__${guide.name} Mythic - ${guide.raid}__`).setColor(0xfaa61a);
     if (guide.thumbnail) {
       embed.setThumbnail(guide.thumbnail);
     }
@@ -63,10 +53,10 @@ export abstract class Guides {
       embed.setDescription(guide.description);
     }
     if (guide.wowhead) {
-      embed.addField("Wowhead", guide.wowhead, true);
+      embed.addField('Wowhead', guide.wowhead, true);
     }
     if (guide.youtube) {
-      embed.addField("Youtube", guide.youtube);
+      embed.addField('Youtube', guide.youtube);
     }
     if (guide.extra && guide.extra.length) {
       guide.extra.forEach((e) => {
