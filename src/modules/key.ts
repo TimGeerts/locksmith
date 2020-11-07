@@ -6,13 +6,11 @@ import { Utils } from '../utils';
 
 export abstract class Key {
   private client: Client;
-  private author: User;
 
   @Command('key :key :level :tank :heal :dps')
   @Description("Displays a template for people to 'sign up' for a given key")
   async key(command: CommandMessage, client: Client) {
     this.client = client;
-    this.author = command.author;
     getDungeons()
       .then((dungeons: IDungeon[]) => {
         if (dungeons && dungeons.length) {
@@ -53,6 +51,8 @@ export abstract class Key {
             const chan = command.channel;
             chan.send(Utils.getPingStringForRoles(missingRoles, command.guild));
             chan.send(keyEmbed).then((m: Message) => {
+              //change the author of the message to be the one that sent the command
+              m.author = command.author;
               missingRoles.forEach((r) => {
                 m.react(Utils.getEmojiForReaction(r));
               });
@@ -90,7 +90,7 @@ export abstract class Key {
     roleCollector.on('collect', (reaction, user) => {
       // check if the reaction was the "lock" icon
       if (reaction.emoji.name === '🔒') {
-        if (user.id !== this.author.id) {
+        if (user.id !== msg.author.id) {
           // ignore and remove the reaction
           reaction.users.remove(user);
         } else {
