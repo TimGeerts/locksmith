@@ -158,11 +158,12 @@ export namespace Utils {
     const tank = this.getEmojiForReaction('Tank');
     const healer = this.getEmojiForReaction('Healer');
     const dps = this.getEmojiForReaction('Dps');
+    const lock = '🔒';
 
     return message.createReactionCollector(
       (reaction: MessageReaction, user: User) => {
         const toCheck = reaction.emoji.id ?? reaction.emoji.name;
-        return !user.bot && [tank, healer, dps].includes(toCheck);
+        return !user.bot && [tank, healer, dps, lock].includes(toCheck);
       },
       {
         dispose: true,

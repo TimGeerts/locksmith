@@ -6,11 +6,13 @@ import { Utils } from '../utils';
 
 export abstract class Key {
   private client: Client;
+  private author: User;
 
   @Command('key :key :level :tank :heal :dps')
   @Description("Displays a template for people to 'sign up' for a given key")
   async key(command: CommandMessage, client: Client) {
     this.client = client;
+    this.author = command.author;
     getDungeons()
       .then((dungeons: IDungeon[]) => {
         if (dungeons && dungeons.length) {
@@ -54,6 +56,7 @@ export abstract class Key {
               missingRoles.forEach((r) => {
                 m.react(Utils.getEmojiForReaction(r));
               });
+              m.react('🔒');
               this.followReactions(m, keyEmbed);
             });
           }
@@ -85,10 +88,22 @@ export abstract class Key {
   private followReactions(msg: Message, embed: MessageEmbed): void {
     const roleCollector = Utils.createRoleReactionCollector(msg);
     roleCollector.on('collect', (reaction, user) => {
-      const roleToAssign = Utils.findRoleNameForReaction(reaction);
-      if (roleToAssign) {
-        this.updateEmbed(embed, user, roleToAssign);
-        msg.edit(embed);
+      // check if the reaction was the "lock" icon
+      if (reaction.emoji.name === '🔒') {
+        if (user.id !== this.author.id) {
+          // ignore and remove the reaction
+          reaction.users.remove(user);
+        } else {
+          this.closeEmbed(embed);
+          msg.edit(embed);
+          msg.reactions.removeAll();
+        }
+      } else {
+        const roleToAssign = Utils.findRoleNameForReaction(reaction);
+        if (roleToAssign) {
+          this.updateEmbed(embed, user, roleToAssign);
+          msg.edit(embed);
+        }
       }
     });
     roleCollector.on('remove', (reaction, user) => {
@@ -107,7 +122,7 @@ export abstract class Key {
     const tank = command.args.tank;
     const heal = command.args.heal;
     let dps = command.args.dps;
-    const embed = new MessageEmbed().setColor('e6cc80');
+    const embed = new MessageEmbed().setColor('#e6cc80');
     embed.setTitle(`[LFG] ${key} +${level}`);
     if (tank === 1 || tank === undefined) {
       embed.addField(Utils.getEmoji('Tank'), '...');
@@ -147,5 +162,14 @@ export abstract class Key {
         userField.value = '...';
       }
     }
+  }
+
+  // close the embed message
+  private closeEmbed(embed: MessageEmbed) {
+    embed
+      .setColor('#000')
+      .setTitle(embed.title.replace('[LFG]', '[FULL]'))
+      .setDescription('*Signups are closed*')
+      .setFooter('Next time, be quicker to join a key, pleb!');
   }
 }
