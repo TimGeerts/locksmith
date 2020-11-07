@@ -37,8 +37,15 @@ export namespace Utils {
     }
   }
 
+  // wrapper that adds the [DEBUG] prefix
+  export function debug(message: string): void {
+    if (process.env.DEBUG === 'true') {
+      this.log(message, 'DEBUG');
+    }
+  }
+
   // wrapper that adds the [ERROR] prefix
-  export function error(message: string) {
+  export function error(message: string): void {
     this.log(message, 'ERROR');
   }
 
@@ -105,21 +112,35 @@ export namespace Utils {
   // adds a role to a given user
   export function addRole(guild: Guild, user: User, role: Role): void {
     // fuck you caching!
-    user.fetch().then((u) => {
-      guild.members.fetch(u).then((m) => {
-        m.roles.add(role);
+    this.debug(`trying to assign role ${role.name} to user ${user.username}`);
+    guild.members
+      .fetch(user)
+      .then((m) => {
+        this.debug(`user ${user.username} found, adding role ${role.name}`);
+        m.roles.add(role).then((r) => {
+          this.debug(`role ${role.name} added to ${user.username}`);
+        });
+      })
+      .catch((e) => {
+        this.error(`${e}`);
       });
-    });
   }
 
   // removes a role from a given user
   export function removeRole(guild: Guild, user: User, role: Role): void {
     // fuck you caching!
-    user.fetch().then((u) => {
-      guild.members.fetch(u).then((m) => {
-        m.roles.remove(role);
+    this.debug(`trying to remove role ${role.name} from user ${user.username}`);
+    guild.members
+      .fetch(user)
+      .then((m) => {
+        this.debug(`user ${user.username} found, removing role ${role.name}`);
+        m.roles.remove(role).then((r) => {
+          this.debug(`role ${role.name} removed from ${user.username}`);
+        });
+      })
+      .catch((e) => {
+        this.error(`${e}`);
       });
-    });
   }
 
   // generic filter that can be used in a reactionCollector used for roles
