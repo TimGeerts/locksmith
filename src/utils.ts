@@ -117,9 +117,14 @@ export namespace Utils {
       .fetch(user)
       .then((m) => {
         this.debug(`user ${user.username} found, adding role ${role.name}`);
-        m.roles.add(role).then((r) => {
-          this.debug(`role ${role.name} added to ${user.username}`);
-        });
+        m.roles
+          .add(role)
+          .then((r) => {
+            this.debug(`role ${role.name} added to ${user.username}`);
+          })
+          .catch((e) => {
+            this.error(`${e}`);
+          });
       })
       .catch((e) => {
         this.error(`${e}`);
@@ -134,9 +139,14 @@ export namespace Utils {
       .fetch(user)
       .then((m) => {
         this.debug(`user ${user.username} found, removing role ${role.name}`);
-        m.roles.remove(role).then((r) => {
-          this.debug(`role ${role.name} removed from ${user.username}`);
-        });
+        m.roles
+          .remove(role)
+          .then((r) => {
+            this.debug(`role ${role.name} removed from ${user.username}`);
+          })
+          .catch((e) => {
+            this.error(`${e}`);
+          });
       })
       .catch((e) => {
         this.error(`${e}`);
