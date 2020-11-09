@@ -1,9 +1,7 @@
-{
-  "apps": [
-    {
-      "name": "locksmith",
-      "script": "npm",
-      "args": "start"
-    }
-  ]
+module.exports = {
+  apps : [{
+    name: "locksmith",
+    script: "npm",
+    args: "start"
+  }]
 }
