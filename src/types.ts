@@ -1,25 +1,3 @@
-export interface IQuickLink {
-  content: string;
-  command: string;
-  description: string;
-}
-
-export interface IGuide {
-  name: string;
-  tags: string[];
-  description: string;
-  thumbnail: string;
-  raid: string;
-  wowhead: string;
-  youtube: string;
-  extra: IExtraInfo[];
-}
-
-export interface IExtraInfo {
-  name: string;
-  content: string;
-}
-
 export interface IRole {
   name: string;
   role: string;
@@ -40,7 +18,7 @@ export interface IDungeon {
 export enum Emoji {
   Tank = '🛡️',
   TankFallBack = '🛡️',
-  Healer = '773896547230023722',
+  Healer = '775365038172536900',
   HealerFallBack = '🇨🇭',
   Dps = '⚔️',
   DpsFallBack = '⚔️',

@@ -1,7 +1,7 @@
 {
-  "name": "sinbot",
+  "name": "locksmith",
   "version": "1.0.0",
-  "description": "Discord bot for The Eighth Sin guild on Draenor EU",
+  "description": "Discord bot for world of warcraft Mythic+ keys",
   "main": "index.js",
   "scripts": {
     "start": "ts-node-dev src/main.ts",

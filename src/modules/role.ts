@@ -1,5 +1,5 @@
 import { ArgsOf, Client, Command, CommandMessage, Infos, Once } from '@typeit/discord';
-import { Message, MessageEmbed, MessageReaction, TextChannel, User } from 'discord.js';
+import { Message, MessageEmbed, TextChannel } from 'discord.js';
 import { getRoleMessage, setRoleMessage } from '../services/resource.service';
 import { IStoredMessage } from '../types';
 import { Utils } from '../utils';
@@ -44,7 +44,7 @@ export abstract class Roles {
       .setColor(Utils.guildColor)
       .setTitle('Role assignment')
       .setDescription(
-        'React to this message to assign your desired role within The Eighth Sin discord.\n(*multiple roles are of course allowed*)'
+        'React to this message to assign your desired role within this discord.\n(*multiple roles are of course allowed*)'
       )
       .addField(
         'Roles',
