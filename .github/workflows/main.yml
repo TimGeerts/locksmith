@@ -27,6 +27,7 @@ jobs:
         env:
           CI: true
   deploy:
+    runs-on: ubuntu-latest
     steps:
       - name: Deploy to Digitalocean
         uses: appleboy/ssh-action@master
