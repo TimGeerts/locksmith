@@ -1,7 +1,9 @@
+# https://dev.to/kenessajr/deploy-a-react-app-to-digitalocean-using-github-actions-and-docker-4pln
 name: CI
 
 on:
   push:
+    branches: [master]
   pull_request:
     branches: [master]
 
