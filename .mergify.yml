@@ -1,7 +1,9 @@
 pull_request_rules:
   - name: automatic merge
     conditions:
-      - check-success=CI
+      - check-success=build (8.x)
+      - check-success=build (10.x)
+      - check-success=build (12.x)
     actions:
       delete_head_branch: {}
       merge:
