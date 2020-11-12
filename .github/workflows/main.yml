@@ -26,6 +26,8 @@ jobs:
         run: npm run build --if-present
         env:
           CI: true
+  deploy:
+    steps:
       - name: Deploy to Digitalocean
         uses: appleboy/ssh-action@master
         env:
