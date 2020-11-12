@@ -14,7 +14,7 @@ export abstract class Roles {
       .then((msg: IStoredMessage) => {
         // check if there was a previous message we should track for reactions
         if (msg && msg?.channelId !== '-1' && msg?.messageId !== '-1') {
-          Utils.debug('previous rolemessage found, attaching handler');
+          Utils.success(':white_check_mark: Previous rolemessage found, attaching handler to the existing message');
           const chan = client.channels.cache.get(msg.channelId) as TextChannel;
           if (chan) {
             chan.messages.fetch(msg.messageId).then((m) => {
