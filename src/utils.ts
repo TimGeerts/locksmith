@@ -38,7 +38,7 @@ export namespace Utils {
   }
 
   export function success(message: string): void {
-    this.log(`:white_check_mark ${message}`);
+    this.log(`:white_check_mark: ${message}`);
   }
 
   // wrapper that adds the [DEBUG] prefix
