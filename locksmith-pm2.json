@@ -1,0 +1,9 @@
+{
+  "apps": [
+    {
+      "name": "locksmith",
+      "script": "npm",
+      "args": "run start:prod"
+    }
+  ]
+}

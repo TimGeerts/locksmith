@@ -41,4 +41,4 @@ jobs:
           script: |
             cd bots/locksmith/
             git pull
-            pm2 restart locksmith
+            pm2 startOrRestart locksmith-pm2.json
